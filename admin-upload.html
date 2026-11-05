@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEMify - Admin Course Upload</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0a1a1a, #0f2626);
+      min-height: 100vh;
+      color: white;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #2dd4bf, #a3e635);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: rgba(19, 47, 47, 0.8);
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #2dd4bf;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(45, 212, 191, 0.1);
+      border-radius: 12px;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2dd4bf;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .upload-btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);
+    }
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .log {
+      background: #0a1a1a;
+      border-radius: 8px;
+      padding: 1rem;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .log-entry {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid rgba(45, 212, 191, 0.1);
+    }
+    .log-entry.success { color: #34d399; }
+    .log-entry.error { color: #f87171; }
+    .log-entry.info { color: #94a3b8; }
+    .level-preview {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .level-chip {
+      padding: 0.5rem;
+      text-align: center;
+      background: rgba(45, 212, 191, 0.1);
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .level-chip .icon { font-size: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔬 STEMify Admin Upload</h1>
+    <p class="subtitle">Upload complete course content to Firebase</p>
+
+    <div class="card">
+      <h2>📊 Content Summary</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">10</div>
+          <div class="stat-label">Levels</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">30</div>
+          <div class="stat-label">Tasks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">10</div>
+          <div class="stat-label">Quizzes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">50</div>
+          <div class="stat-label">Questions</div>
+        </div>
+      </div>
+      
+      <h3 style="margin-bottom: 0.5rem; color: #94a3b8;">Sensors Included:</h3>
+      <div class="level-preview">
+        <div class="level-chip"><div class="icon">📏</div>Ultrasonic</div>
+        <div class="level-chip"><div class="icon">🌡️</div>Temperature</div>
+        <div class="level-chip"><div class="icon">💨</div>Gas</div>
+        <div class="level-chip"><div class="icon">📡</div>IR</div>
+        <div class="level-chip"><div class="icon">🌱</div>Soil</div>
+        <div class="level-chip"><div class="icon">💡</div>Light</div>
+        <div class="level-chip"><div class="icon">🔥</div>Flame</div>
+        <div class="level-chip"><div class="icon">🚶</div>Motion</div>
+        <div class="level-chip"><div class="icon">🌊</div>Water</div>
+        <div class="level-chip"><div class="icon">🔊</div>Sound</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🚀 Upload to Firebase</h2>
+      <button class="upload-btn" onclick="uploadAll()" id="uploadBtn">
+        📤 Upload All Course Content
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>📋 Upload Log</h2>
+      <div class="log" id="log">
+        <div class="log-entry info">Ready to upload. Click the button above.</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase configuration
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAehc3IR1dhZt6mmzLEcKh0EFeSYQuqX1s",
+      authDomain: "stemify-dashboard.firebaseapp.com",
+      databaseURL: "https://stemify-dashboard-default-rtdb.firebaseio.com",
+      projectId: "stemify-dashboard",
+      storageBucket: "stemify-dashboard.firebasestorage.app",
+      messagingSenderId: "711595453144",
+      appId: "1:711595453144:web:d4f4f3351ed7ee811b05ad"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Course content (condensed version)
+    const COURSE_CONTENT = {
+      1: {
+        tasks: [
+          { id: 1001, taskNumber: 1, type: "wiring", title: "Connect Ultrasonic Sensor to ESP32", description: "Learn the basics of the HC-SR04 ultrasonic sensor and connect it properly to your ESP32 board.", instructions: "📚 WHAT YOU'LL LEARN:\n• How ultrasonic sensors work (sound waves)\n• Pin configuration of HC-SR04\n• Safe wiring practices\n\n🔌 WIRING STEPS:\n1. Connect VCC pin → ESP32 5V (or VIN)\n2. Connect GND pin → ESP32 GND\n3. Connect TRIG pin → ESP32 GPIO 12\n4. Connect ECHO pin → ESP32 GPIO 13\n   ⚠️ Use a voltage divider for ECHO!", xpReward: 50 },
+          { id: 1002, taskNumber: 2, type: "testing", title: "Test Distance Measurements", description: "Upload test code and verify your ultrasonic sensor is measuring distances correctly.", instructions: "📚 WHAT YOU'LL LEARN:\n• How to read sensor data\n• Understanding distance calculations\n• Serial monitor debugging\n\n🧪 TESTING STEPS:\n1. Open Arduino IDE\n2. Upload the test code\n3. Open Serial Monitor (115200 baud)\n4. Place objects at different distances", xpReward: 50 },
+          { id: 1003, taskNumber: 3, type: "coding", title: "Block Coding: Obstacle Detection", description: "Use block coding to create an obstacle detection system that stops the car when objects are too close.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a program that:\n1. Reads the ultrasonic sensor\n2. If distance < 20cm → Stop the car\n3. If distance >= 20cm → Move forward\n4. Repeat continuously\n\n📋 BLOCKS TO USE:\n• 📡 Read Sensor\n• ⬆️ Move Forward\n• 🛑 Stop\n• ⏱️ Wait 500ms", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does the ultrasonic sensor use to measure distance?", options: ["Light waves", "Sound waves", "Radio waves", "Heat waves"], correctAnswer: 1 },
+            { question: "What is the maximum range of HC-SR04 sensor?", options: ["100cm", "200cm", "400cm", "1000cm"], correctAnswer: 2 },
+            { question: "Which pin sends the ultrasonic pulse?", options: ["VCC", "GND", "TRIG", "ECHO"], correctAnswer: 2 },
+            { question: "Why do we need a voltage divider for ECHO pin?", options: ["To increase voltage", "To convert 5V to 3.3V for ESP32", "To make it faster", "To reduce noise"], correctAnswer: 1 },
+            { question: "How is distance calculated from ultrasonic sensor?", options: ["Time × Speed of light", "Time × Speed of sound / 2", "Voltage × 100", "Frequency × Wavelength"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      2: {
+        tasks: [
+          { id: 2001, taskNumber: 1, type: "wiring", title: "Connect DHT11 Temperature Sensor", description: "Wire the DHT11 sensor to read temperature and humidity data.", instructions: "📚 WHAT YOU'LL LEARN:\n• DHT11 sensor specifications\n• Single-wire communication\n• Pull-up resistor usage\n\n🔌 WIRING STEPS:\n1. Connect VCC → ESP32 3.3V\n2. Connect GND → ESP32 GND\n3. Connect DATA → ESP32 GPIO 4\n4. Add 10KΩ pull-up resistor between DATA and VCC", xpReward: 50 },
+          { id: 2002, taskNumber: 2, type: "testing", title: "Read Temperature & Humidity", description: "Install the DHT library and test sensor readings.", instructions: "📚 WHAT YOU'LL LEARN:\n• Installing Arduino libraries\n• Reading digital sensor data\n• Understanding temperature units\n\n📦 LIBRARY INSTALLATION:\n1. Arduino IDE → Sketch → Include Library → Manage Libraries\n2. Search 'DHT sensor library' by Adafruit\n3. Click Install", xpReward: 50 },
+          { id: 2003, taskNumber: 3, type: "coding", title: "Block Coding: Temperature Alert System", description: "Create a temperature monitoring system with alerts.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a program that:\n1. Reads temperature continuously\n2. If temp > 30°C → Turn on LED + Buzzer\n3. If temp <= 30°C → LED off, no buzzer\n4. Display reading on dashboard", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does DHT11 measure?", options: ["Only temperature", "Only humidity", "Temperature and humidity", "Pressure"], correctAnswer: 2 },
+            { question: "What voltage should DHT11 be connected to?", options: ["1.8V", "3.3V", "5V", "12V"], correctAnswer: 1 },
+            { question: "What is the temperature range of DHT11?", options: ["-40 to 80°C", "0 to 50°C", "-20 to 100°C", "10 to 40°C"], correctAnswer: 1 },
+            { question: "Why is a pull-up resistor sometimes needed?", options: ["To increase current", "To ensure stable HIGH signal on data line", "To reduce temperature", "To increase humidity"], correctAnswer: 1 },
+            { question: "How often can DHT11 be read?", options: ["Every 10ms", "Every 100ms", "Every 1 second", "Every 2 seconds"], correctAnswer: 3 }
+          ],
+          passPercentage: 60
+        }
+      },
+      3: {
+        tasks: [
+          { id: 3001, taskNumber: 1, type: "wiring", title: "Connect MQ-2 Gas Sensor", description: "Wire the MQ-2 sensor for gas and smoke detection.", instructions: "⚠️ SAFETY WARNING: MQ-2 heater gets HOT during operation\n\n🔌 WIRING STEPS:\n1. Connect VCC → ESP32 5V\n2. Connect GND → ESP32 GND\n3. Connect AO (Analog) → ESP32 GPIO 34\n4. Connect DO (Digital) → ESP32 GPIO 35\n\n⏱️ WARM-UP TIME: 2-3 minutes needed", xpReward: 50 },
+          { id: 3002, taskNumber: 2, type: "testing", title: "Detect Gas and Smoke", description: "Test the sensor with safe substances and calibrate readings.", instructions: "🧪 SAFE TEST IDEAS:\n• Wave a lighter (unlit) near sensor → gas detected\n• Blow out a match near sensor → smoke detected\n• Use rubbing alcohol on cotton → vapor detected\n• ⚠️ DO NOT use actual flames!", xpReward: 50 },
+          { id: 3003, taskNumber: 3, type: "coding", title: "Block Coding: Gas Leak Alarm", description: "Create a gas leak detection system with visual and audio alerts.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a safety system that:\n1. Continuously monitors gas levels\n2. If gas > threshold → Sound alarm + Flash LED\n3. Display gas level on dashboard\n4. Show 'DANGER' or 'SAFE' status", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What gases can MQ-2 sensor detect?", options: ["Only oxygen", "Only CO2", "LPG, smoke, methane, propane", "Only nitrogen"], correctAnswer: 2 },
+            { question: "Why does MQ-2 need warm-up time?", options: ["To charge the battery", "Heater needs to reach operating temperature", "To download updates", "To calibrate automatically"], correctAnswer: 1 },
+            { question: "What type of output does AO pin provide?", options: ["Digital (0 or 1)", "Analog (0-4095)", "PWM", "I2C data"], correctAnswer: 1 },
+            { question: "What voltage does MQ-2 require?", options: ["3.3V only", "5V", "12V", "1.8V"], correctAnswer: 1 },
+            { question: "What happens to sensor reading when gas is detected?", options: ["Value decreases", "Value increases", "Value stays same", "Sensor turns off"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      4: {
+        tasks: [
+          { id: 4001, taskNumber: 1, type: "wiring", title: "Connect IR Obstacle Sensor", description: "Wire the IR sensor module to detect nearby obstacles.", instructions: "🔌 WIRING STEPS:\n1. Connect VCC → ESP32 3.3V\n2. Connect GND → ESP32 GND\n3. Connect OUT → ESP32 GPIO 15\n\n🔧 SENSITIVITY ADJUSTMENT:\n• Most IR modules have a potentiometer\n• Turn clockwise = less sensitive\n• Turn counter-clockwise = more sensitive", xpReward: 50 },
+          { id: 4002, taskNumber: 2, type: "testing", title: "Test Obstacle Detection", description: "Verify the IR sensor detects obstacles at various distances.", instructions: "🧪 TEST EXPERIMENTS:\n• Place hand in front → detects\n• Use white paper → detects easily\n• Use black paper → may not detect (IR absorbed)\n• Test at different distances\n\n📊 COLOR EFFECTS:\n• White/light colors → reflect IR well\n• Black/dark colors → absorb IR", xpReward: 50 },
+          { id: 4003, taskNumber: 3, type: "coding", title: "Block Coding: Line Following Robot", description: "Program the car to follow a line or avoid obstacles.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate obstacle avoidance:\n1. Move forward by default\n2. When obstacle detected → Stop\n3. Turn right\n4. Check again\n5. Continue if clear", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does IR stand for?", options: ["Internal Resistance", "Infrared", "Input Reader", "Image Recognition"], correctAnswer: 1 },
+            { question: "How does an IR obstacle sensor work?", options: ["Detects sound waves", "Emits IR light and detects reflection", "Measures temperature", "Uses GPS"], correctAnswer: 1 },
+            { question: "What color is hardest for IR sensors to detect?", options: ["White", "Yellow", "Black", "Red"], correctAnswer: 2 },
+            { question: "What does LOW output typically mean?", options: ["No obstacle", "Obstacle detected", "Sensor error", "Low battery"], correctAnswer: 1 },
+            { question: "What component adjusts IR sensor sensitivity?", options: ["Capacitor", "Resistor", "Potentiometer", "Transistor"], correctAnswer: 2 }
+          ],
+          passPercentage: 60
+        }
+      },
+      5: {
+        tasks: [
+          { id: 5001, taskNumber: 1, type: "wiring", title: "Connect Soil Moisture Sensor", description: "Wire the soil moisture sensor to monitor plant watering needs.", instructions: "🔌 WIRING STEPS:\n1. Connect VCC → ESP32 3.3V\n2. Connect GND → ESP32 GND\n3. Connect AO → ESP32 GPIO 34\n\n⚠️ SENSOR TYPES:\n• Resistive: Cheaper, corrodes over time\n• Capacitive: More durable, recommended", xpReward: 50 },
+          { id: 5002, taskNumber: 2, type: "testing", title: "Measure Soil Moisture Levels", description: "Calibrate and test moisture readings in different conditions.", instructions: "🧪 CALIBRATION:\n1. Put sensor in air → note the value (dry)\n2. Put sensor in water → note the value (wet)\n3. Update calibration values in code\n\n📊 READINGS:\n• Dry: 0-30%\n• Good: 30-70%\n• Wet: 70-100%", xpReward: 50 },
+          { id: 5003, taskNumber: 3, type: "coding", title: "Block Coding: Smart Plant Watering Alert", description: "Create an automatic plant monitoring system.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a plant care system:\n1. Read soil moisture every 5 seconds\n2. If moisture < 30% → Alert (LED + Buzzer)\n3. Display moisture level on dashboard\n4. Show 'Water Me!' or 'I'm Happy!' status", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does a soil moisture sensor measure?", options: ["Soil temperature", "Water content in soil", "Soil pH", "Soil nutrients"], correctAnswer: 1 },
+            { question: "Which sensor type is more durable?", options: ["Resistive", "Capacitive", "Both equal", "Neither"], correctAnswer: 1 },
+            { question: "Why do resistive sensors corrode?", options: ["They use batteries", "Electric current through wet soil causes electrolysis", "They get too hot", "Sunlight damages them"], correctAnswer: 1 },
+            { question: "What reading indicates dry soil?", options: ["Low value (close to 0)", "High value (close to 4095)", "Exactly 2048", "Negative value"], correctAnswer: 1 },
+            { question: "What is the ideal moisture level for most plants?", options: ["0-20%", "30-70%", "80-100%", "Exactly 50%"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      6: {
+        tasks: [
+          { id: 6001, taskNumber: 1, type: "wiring", title: "Connect LDR Light Sensor", description: "Create a voltage divider circuit with the LDR.", instructions: "🔌 WIRING (VOLTAGE DIVIDER):\n   3.3V\n    │\n   [LDR]\n    │\n    ├──────► GPIO 35\n    │\n   [10KΩ]\n    │\n   GND\n\n⚡ HOW IT WORKS:\n• Dark: LDR resistance HIGH → low voltage\n• Light: LDR resistance LOW → high voltage", xpReward: 50 },
+          { id: 6002, taskNumber: 2, type: "testing", title: "Measure Light Intensity", description: "Test the LDR in different lighting conditions.", instructions: "🧪 TEST EXPERIMENTS:\n• Cover LDR → low reading (dark)\n• Phone flashlight → high reading\n• Room light on/off → see change\n• Near window → varies with sun", xpReward: 50 },
+          { id: 6003, taskNumber: 3, type: "coding", title: "Block Coding: Automatic Headlights", description: "Create automatic headlights that turn on in darkness.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate auto-headlights:\n1. Read light level continuously\n2. If dark (< 30%) → Turn on LED\n3. If bright (> 30%) → Turn off LED\n4. Like real car headlights!", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does LDR stand for?", options: ["Light Dependent Resistor", "Low Data Rate", "Linear Detection Range", "Laser Distance Reader"], correctAnswer: 0 },
+            { question: "What happens to LDR resistance in bright light?", options: ["Increases", "Decreases", "Stays same", "Becomes infinite"], correctAnswer: 1 },
+            { question: "Why do we need a voltage divider with LDR?", options: ["To increase brightness", "To convert resistance change to voltage change", "To protect the LDR", "To make it waterproof"], correctAnswer: 1 },
+            { question: "What value resistor is typically used with LDR?", options: ["100Ω", "1KΩ", "10KΩ", "1MΩ"], correctAnswer: 2 },
+            { question: "What is a common application of LDR?", options: ["Temperature measurement", "Automatic street lights", "Playing music", "WiFi connection"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      7: {
+        tasks: [
+          { id: 7001, taskNumber: 1, type: "wiring", title: "Connect Flame Sensor Module", description: "Wire the flame detection sensor for fire safety monitoring.", instructions: "⚠️ SAFETY WARNING: Do NOT use actual fires for testing\n\n🔌 WIRING STEPS:\n1. Connect VCC → ESP32 3.3V\n2. Connect GND → ESP32 GND\n3. Connect DO → ESP32 GPIO 16\n4. Connect AO → ESP32 GPIO 36\n\n📊 DETECTION: 760-1100nm wavelength", xpReward: 50 },
+          { id: 7002, taskNumber: 2, type: "testing", title: "Test Flame Detection", description: "Safely test flame detection using IR sources.", instructions: "🧪 SAFE TEST IDEAS:\n• TV remote → point at sensor, press button\n• Phone camera with flash on\n• Candle from safe distance (adult supervision)\n• IR LED if available", xpReward: 50 },
+          { id: 7003, taskNumber: 3, type: "coding", title: "Block Coding: Fire Alarm System", description: "Create a fire detection and alarm system.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a fire safety system:\n1. Monitor flame sensor continuously\n2. If flame detected → Full alarm mode\n3. Buzzer sounds, LED flashes\n4. Car reverses away from danger", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What type of light does a flame sensor detect?", options: ["Visible light", "Ultraviolet", "Infrared (IR)", "X-ray"], correctAnswer: 2 },
+            { question: "What is the typical detection range of a flame sensor?", options: ["5cm", "80cm", "5 meters", "50 meters"], correctAnswer: 1 },
+            { question: "What wavelength range do flame sensors detect?", options: ["400-700nm", "760-1100nm", "1500-2000nm", "100-300nm"], correctAnswer: 1 },
+            { question: "Why can TV remotes trigger flame sensors?", options: ["They emit radio waves", "They emit infrared light", "They are very hot", "They make sound"], correctAnswer: 1 },
+            { question: "What does LOW output from flame sensor indicate?", options: ["No flame", "Flame detected", "Sensor error", "Low battery"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      8: {
+        tasks: [
+          { id: 8001, taskNumber: 1, type: "wiring", title: "Connect PIR Motion Sensor", description: "Wire the PIR sensor for motion detection applications.", instructions: "🔌 WIRING STEPS:\n1. Connect VCC → ESP32 5V (PIR needs 5V)\n2. Connect GND → ESP32 GND\n3. Connect OUT → ESP32 GPIO 17\n\n⏱️ WARM-UP: PIR needs 30-60 seconds to stabilize\nDon't move during warm-up!", xpReward: 50 },
+          { id: 8002, taskNumber: 2, type: "testing", title: "Test Motion Detection", description: "Test the PIR sensor's motion detection capabilities.", instructions: "🧪 TEST EXPERIMENTS:\n• Wave hand → triggers\n• Walk past sensor → triggers\n• Stay still → no trigger\n• Pet walking → may trigger!\n\n⚙️ ADJUSTMENTS:\n• Turn sensitivity pot for range\n• Turn time pot for output duration", xpReward: 50 },
+          { id: 8003, taskNumber: 3, type: "coding", title: "Block Coding: Security Alarm System", description: "Create a motion-activated security system.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate a security system:\n1. Monitor for motion continuously\n2. When motion detected → Sound buzzer 3 times\n3. Flash LED\n4. Display 'INTRUDER!' on dashboard\n5. After 5 seconds, reset to monitoring", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What does PIR stand for?", options: ["Power Infrared Receiver", "Passive Infrared", "Positive IR", "Projected IR"], correctAnswer: 1 },
+            { question: "Why is PIR called 'passive'?", options: ["It doesn't use power", "It only receives IR, doesn't emit it", "It's very slow", "It requires less wiring"], correctAnswer: 1 },
+            { question: "What does PIR actually detect?", options: ["Sound waves", "Changes in infrared radiation (body heat)", "Magnetic fields", "Radio waves"], correctAnswer: 1 },
+            { question: "Why does PIR need warm-up time?", options: ["To charge the battery", "To calibrate to ambient IR levels", "To connect to WiFi", "To update firmware"], correctAnswer: 1 },
+            { question: "What can trigger a false positive on PIR?", options: ["Loud sounds", "Hot air from heater/AC", "Strong WiFi signal", "Bright visible light"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      9: {
+        tasks: [
+          { id: 9001, taskNumber: 1, type: "wiring", title: "Connect Water Level Sensor", description: "Wire the water level sensor for liquid detection.", instructions: "🔌 WIRING STEPS:\n1. Connect + (VCC) → ESP32 3.3V\n2. Connect - (GND) → ESP32 GND\n3. Connect S (Signal) → ESP32 GPIO 34\n\n⚠️ IMPORTANT:\n• Only submerge the sensing part\n• Keep electronics dry!\n• Don't power continuously (corrosion)", xpReward: 50 },
+          { id: 9002, taskNumber: 2, type: "testing", title: "Test Water Level Detection", description: "Test the sensor with different water levels.", instructions: "🧪 TEST WITH:\n• Cup of water\n• Dip sensor gradually\n• Observe level changes\n• Remove and see it drop\n\n📊 READINGS:\n• DRY: < 300\n• LOW: 300-1000\n• MEDIUM: 1000-1500\n• HIGH: > 1500", xpReward: 50 },
+          { id: 9003, taskNumber: 3, type: "coding", title: "Block Coding: Flood Warning System", description: "Create a flood detection and warning system.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate flood detection:\n1. Monitor water level continuously\n2. If level > 70% → Flood warning\n3. Buzzer alarm + LED flash\n4. Car moves to safety (backward)", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "How does a water level sensor work?", options: ["Measures water temperature", "Measures conductivity between traces", "Uses ultrasonic waves", "Measures water pressure"], correctAnswer: 1 },
+            { question: "Why shouldn't you power the sensor continuously?", options: ["Uses too much electricity", "Causes electrolysis and corrosion", "Makes too much noise", "Overheats the water"], correctAnswer: 1 },
+            { question: "What part of the sensor should be in water?", options: ["The entire sensor", "Only the parallel trace section", "Only the connector", "Nothing should touch water"], correctAnswer: 1 },
+            { question: "What type of output does this sensor provide?", options: ["Digital only", "Analog only", "Both digital and analog", "I2C"], correctAnswer: 1 },
+            { question: "What happens to the reading as water level increases?", options: ["Value decreases", "Value increases", "Value stays same", "Value becomes negative"], correctAnswer: 1 }
+          ],
+          passPercentage: 60
+        }
+      },
+      10: {
+        tasks: [
+          { id: 10001, taskNumber: 1, type: "wiring", title: "Connect Sound Sensor Module", description: "Wire the microphone module for sound detection.", instructions: "🔌 WIRING STEPS:\n1. Connect VCC → ESP32 3.3V\n2. Connect GND → ESP32 GND\n3. Connect AO → ESP32 GPIO 34 (Analog)\n4. Connect DO → ESP32 GPIO 35 (Digital)\n\n🔧 SENSITIVITY:\n• Adjust potentiometer on module\n• Turn until LED barely lights in quiet", xpReward: 50 },
+          { id: 10002, taskNumber: 2, type: "testing", title: "Test Sound Detection", description: "Test the sensor with different sound levels.", instructions: "🧪 TEST WITH:\n• Clap your hands\n• Snap fingers\n• Whistle\n• Play music\n\n📊 INTENSITY:\n• Quiet: < 100\n• Normal: 100-500\n• Loud: 500-1000\n• VERY LOUD: > 1000", xpReward: 50 },
+          { id: 10003, taskNumber: 3, type: "coding", title: "Block Coding: Voice-Activated Robot", description: "Create a sound-activated robot control system.", instructions: "🧱 BLOCK CODING CHALLENGE:\n\nCreate voice/clap control:\n1. Wait for loud sound (clap)\n2. First clap → Car moves forward\n3. Second clap → Car stops\n4. Third clap → Car turns\n5. Cycle repeats!", xpReward: 50 }
+        ],
+        quiz: {
+          questions: [
+            { question: "What type of microphone is in most sound sensor modules?", options: ["Dynamic", "Electret condenser", "Ribbon", "Carbon"], correctAnswer: 1 },
+            { question: "What does the sound sensor convert?", options: ["Light to sound", "Sound waves to electrical signals", "Heat to sound", "Motion to sound"], correctAnswer: 1 },
+            { question: "What is measured in decibels (dB)?", options: ["Light intensity", "Sound level", "Temperature", "Distance"], correctAnswer: 1 },
+            { question: "Why do we need a baseline reading?", options: ["To charge the sensor", "To filter out ambient noise", "To connect to WiFi", "To calibrate color"], correctAnswer: 1 },
+            { question: "What component adjusts detection threshold?", options: ["Capacitor", "LED", "Potentiometer", "Transistor"], correctAnswer: 2 }
+          ],
+          passPercentage: 60
+        }
+      }
+    };
+
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    window.uploadAll = async function() {
+      const btn = document.getElementById('uploadBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Uploading...';
+
+      log('🚀 Starting upload...', 'info');
+
+      for (const [level, content] of Object.entries(COURSE_CONTENT)) {
+        try {
+          // Upload tasks
+          await set(ref(db, `levelTasks/${level}`), content.tasks);
+          log(`✅ Level ${level} tasks uploaded`, 'success');
+
+          // Upload quiz
+          await set(ref(db, `levelQuizzes/${level}`), content.quiz);
+          log(`✅ Level ${level} quiz uploaded`, 'success');
+
+        } catch (error) {
+          log(`❌ Error uploading level ${level}: ${error.message}`, 'error');
+        }
+      }
+
+      log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+      log('🎉 ALL CONTENT UPLOADED SUCCESSFULLY!', 'success');
+      log('📊 Summary: 10 levels, 30 tasks, 10 quizzes', 'info');
+      log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+      btn.textContent = '✅ Upload Complete!';
+      btn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+    };
+  </script>
+</body>
+</html>
+
